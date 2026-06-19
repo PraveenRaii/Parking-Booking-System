@@ -1,0 +1,256 @@
+body {
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    background-color: #f5f5f5;
+    padding-bottom: 120px;
+}
+
+.app {
+    width: 100%;
+    max-width: 1200px;
+    padding: 30px;
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.filter-btn {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: none;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.search-section {
+    margin-top: 30px;
+}
+
+.search-box {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background-color: white;
+    padding: 18px 20px;
+    border-radius: 20px;
+}
+
+.search-box input {
+    border: none;
+    outline: none;
+    width: 100%;
+    font-size: 16px;
+    background-color: transparent;
+}
+
+.category-section {
+    margin-top: 35px;
+}
+
+.categories {
+    display: flex;
+    gap: 15px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+
+}
+
+.categories button {
+    padding: 14px 24px;
+    border: none;
+    border-radius: 18px;
+    background-color: white;
+    cursor: pointer;
+    font-size: 15px;
+}
+
+.active-category {
+    background: #7B61FF !important;
+    color: white;
+}
+
+.nearby-section {
+    margin-top: 40px;
+}
+
+.parking-cards {
+    margin-top: 20px;
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    margin-top: 20px;
+}
+
+.parking-card {
+    background-color: white;
+    border-radius: 25px;
+    padding: 20px;
+    min-width: 300px;
+
+}
+
+.card-img {
+    width: 100%;
+    height: 180px;
+    background: #ddd;
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+}
+
+.card-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.card-content {
+    margin-top: 15px;
+}
+
+.card-content h3 {
+    margin: 0;
+}
+
+.card-content p {
+    color: gray;
+}
+
+
+.card-content span {
+    font-weight: bold;
+}
+
+.fav-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 50%;
+    background: white;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+}
+
+.rating {
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.address {
+    color: gray;
+    font-size: 14px;
+}
+
+.price {
+    color: #7B61FF;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* /button design */
+.bottom-nav{
+    position: fixed;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%;
+    max-width: 500px;
+    background:white;
+    border-radius: 30px;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow:  0 4px 20px rgba(0,0,0,0.15);
+}
+
+.nav-item{
+    border: none;
+    background: transparent;
+    cursor: pointer;
+}
+
+.active-nav{
+    background: #7B61FF;
+    border-radius: 50%;
+    padding: 12px;
+}
+
+.scan-btn{
+    width: 65px;
+    height: 65px;
+    border: none;
+    border-radius: 50%;
+    background: #7B61FF;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.popular-section{
+    margin-top: 50px;
+}
+
+.popular-card{
+    background: white;
+    border-radius: 25px;
+    padding: 20px;
+    margin-top: 20px;
+    display:flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 30px;
+}
+
+.popular-image{
+    width: 250px;
+    height: 180px;
+    border-radius: 20px;
+    overflow: hidden;
+    object-fit: cover;
+    flex-shrink: 0;
+
+}
+
+.popular-content{
+    margin-top: 20px;
+    flex: 1;
+}
+
+.popular-bottom{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.book-btn{
+    border: none;
+    background: #7B61FF;
+    color: white;
+    padding: 14px 22px;
+    border-radius: 15px;
+    cursor: pointer;
+}

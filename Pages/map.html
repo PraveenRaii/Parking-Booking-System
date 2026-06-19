@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Map</title>
+    <link rel="stylesheet" href="../Css/map.css">
+</head>
+<body>
+   <div class="map-container">
+
+    <!-- Top Search Section -->
+    <div class="map-top">
+
+        <div class="map-search">
+            <input type="text" placeholder="Search location...">
+        </div>
+
+        <button class="filter-btn">
+            <img src="../icon/filter_alt_50dp_000000_FILL0_wght700_GRAD0_opsz48.svg" alt="">
+        </button>
+
+    </div>
+
+    <!-- Map Area -->
+    <div class="map-area">
+
+        <!-- Parking Markers -->
+        <div class="marker marker-1"
+            data-name="Victoria Parking"
+            data-rating="4.2"
+            data-location="Hazratganj, Lucknow"
+            
+            data-price="80">
+            ₹80
+        </div>
+
+        <div class="marker marker-2"
+            data-name="City Mall Parking"
+            data-rating="4.5"
+            data-location="Gomti Nagar, Lucknow"
+            data-price="120">
+            ₹120
+        </div>
+
+        <div class="marker marker-3"
+            data-name="Metro Parking"
+            data-rating="4.0"
+            data-location="Alambagh, Lucknow"
+            data-price="60">
+            ₹60
+        </div>
+
+        <!-- Current Location -->
+        <button class="location-btn">
+            <img src="../icon/map_30dp_000000_FILL0_wght400_GRAD0_opsz24.svg" alt="">
+        </button>
+
+    </div>
+
+    <!-- Bottom Card -->
+    <div class="bottom-card">
+
+        <h3 id="parking-name">Victoria Parking</h3>
+
+        <p>
+            <img src="../icon/star_26dp_000000_FILL0_wght400_GRAD0_opsz24.svg" alt=""> <span id="parking-rating">4.2</span>
+        </p>
+
+        <p>
+            <img src="../icon/location_on_20dp_000000_FILL0_wght400_GRAD0_opsz20.svg" alt=""> <span id="parking-location">
+                Hazratganj, Lucknow
+            </span>
+        </p>
+
+        <div class="price">
+            ₹ <span id="parking-price">80</span>/hr
+        </div>
+
+        <button class="book-btn">
+            Book Now
+        </button>
+
+    </div>
+
+</div>
+
+<script src="../Js/map.js"></script>
+</body>
+</html>

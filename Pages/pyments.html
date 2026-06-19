@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Payment</title>
+<link rel="stylesheet" href="../Css/payment.css">
+</head>
+<body>
+
+<div class="payment-container">
+
+    <h2>Choose Payment Method</h2>
+
+    <div class="payment-methods">
+
+        <div class="method active">
+            <img src="../icon/credit_card_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg" alt=""> Card Payment
+        </div>
+
+        <div class="method">
+            <img src="../icon/upi_pay_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg" alt=""> UPI Payment
+        </div>
+
+        <div class="method">
+            <img src="../icon/wallet_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg" alt=""> Wallet
+        </div>
+
+    </div>
+
+    <div class="card-box">
+
+        <label>Card Number</label>
+        <input type="text" placeholder="1234 5678 9012 3456">
+
+        <label>Card Holder</label>
+        <input type="text" placeholder="Sattu Kumar">
+
+        <div class="row">
+
+            <input type="text" placeholder="MM/YY">
+
+            <input type="text" placeholder="CVV">
+
+        </div>
+
+    </div>
+
+    <div class="payment-summary">
+
+        <h3>Payment Summary</h3>
+
+        <p>Parking Fee : ₹240</p>
+
+        <p>GST : ₹20</p>
+
+        <h3>Total : ₹260</h3>
+
+    </div>
+
+    <button id="payBtn">
+        Pay Now
+    </button>
+
+</div>
+
+<script src="../Js/payment.js"></script>
+
+</body>
+</html>

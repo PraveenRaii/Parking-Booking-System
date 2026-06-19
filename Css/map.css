@@ -1,0 +1,191 @@
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, Helvetica, sans-serif;
+}
+
+body{
+    background:#f5f5f5;
+}
+
+.map-container{
+    position:relative;
+    width:100%;
+    height:100vh;
+}
+
+.map-area{
+    width:100%;
+    height:100vh;
+
+    background-image:url("https://images.unsplash.com/photo-1524661135-423995f22d0b");
+    background-size:cover;
+    background-position:center;
+    background-repeat:no-repeat;
+
+    position:relative;
+}
+
+/* Top Search */
+
+.map-top{
+    position:absolute;
+    top:20px;
+    left:20px;
+    right:20px;
+
+    display:flex;
+    gap:15px;
+
+    z-index:10;
+}
+
+.map-search{
+    flex:1;
+    background:white;
+    border-radius:20px;
+    padding:18px 20px;
+}
+
+.map-search input{
+    width:100%;
+    border:none;
+    outline:none;
+    background:transparent;
+    font-size:16px;
+}
+
+.filter-btn{
+    width:60px;
+    height:60px;
+    border:none;
+    border-radius:20px;
+    background:white;
+    cursor:pointer;
+}
+
+.filter-btn img{
+    width:28px;
+}
+
+/* Marker */
+
+.marker{
+    position:absolute;
+
+    min-width:70px;
+    height:40px;
+
+    background:#7B61FF;
+    color:white;
+
+    border-radius:20px;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    font-weight:bold;
+
+    cursor:pointer;
+
+    transition:.3s;
+}
+
+.marker:hover{
+    transform:scale(1.1);
+}
+
+.marker.active{
+    background:#5a3df0;
+}
+
+.marker-1{
+    top:220px;
+    left:150px;
+}
+
+.marker-2{
+    top:350px;
+    right:180px;
+}
+
+.marker-3{
+    top:500px;
+    left:100px;
+}
+
+/* Location Button */
+
+.location-btn{
+    position:absolute;
+
+    bottom:230px;
+    right:25px;
+
+    width:60px;
+    height:60px;
+
+    border:none;
+    border-radius:50%;
+
+    background:white;
+    cursor:pointer;
+}
+
+.location-btn img{
+    width:28px;
+}
+
+/* Bottom Card */
+
+.bottom-card{
+    position:absolute;
+
+    left:50%;
+    bottom:20px;
+
+    transform:translateX(-50%);
+
+    width:90%;
+
+    background:white;
+
+    padding:20px;
+
+    border-radius:25px;
+
+    box-shadow:0 5px 20px rgba(0,0,0,0.15);
+}
+
+.bottom-card h3{
+    margin-bottom:15px;
+}
+
+.bottom-card p{
+    margin-bottom:12px;
+    font-size:15px;
+}
+
+.price{
+    margin-top:10px;
+    font-size:18px;
+    font-weight:bold;
+}
+
+.book-btn{
+    width:100%;
+    height:55px;
+
+    margin-top:20px;
+
+    border:none;
+    border-radius:15px;
+
+    background:#7B61FF;
+    color:white;
+
+    font-size:18px;
+    cursor:pointer;
+}
