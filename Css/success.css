@@ -34,3 +34,14 @@ button{
     background:#7B61FF;
     color:white;
 }
+
+.booking-details{
+    margin-top:20px;
+    background:white;
+    padding:20px;
+    border-radius:15px;
+}
+
+.booking-details p{
+    margin:10px 0;
+}

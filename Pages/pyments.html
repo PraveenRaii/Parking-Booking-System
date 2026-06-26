@@ -14,47 +14,129 @@
 
     <div class="payment-methods">
 
-        <div class="method active">
+        <div class="method active" data-payment="card">
             <img src="../icon/credit_card_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg" alt=""> Card Payment
         </div>
 
-        <div class="method">
+        <div class="method" data-payment="upi">
             <img src="../icon/upi_pay_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg" alt=""> UPI Payment
         </div>
 
-        <div class="method">
+        <div class="method" data-payment="wallet">
             <img src="../icon/wallet_24dp_000000_FILL0_wght400_GRAD0_opsz24.svg" alt=""> Wallet
         </div>
 
+          <div class="method" data-payment="cash">
+        💵 Cash
     </div>
 
-    <div class="card-box">
+    </div>
+
+     <div class="card-box">
+
+        <label>Card Type</label>
+
+        <select id="cardType">
+            <option>Visa</option>
+            <option>Master Card</option>
+            <option>RuPay</option>
+        </select>
 
         <label>Card Number</label>
-        <input type="text" placeholder="1234 5678 9012 3456">
+        <input type="text" id="cardNumber">
 
         <label>Card Holder</label>
-        <input type="text" placeholder="Sattu Kumar">
+        <input type="text" id="cardHolder">
 
         <div class="row">
-
-            <input type="text" placeholder="MM/YY">
-
-            <input type="text" placeholder="CVV">
-
+            <input type="text" placeholder="MM/YY" id="expiry">
+            <input type="text" placeholder="CVV" id="cvv">
         </div>
 
     </div>
 
+    <!-- UPI BOX -->
+
+    <div class="upi-box">
+
+        <h3>Select UPI App</h3>
+
+        <div class="upi-options">
+
+            <label>
+                <input type="radio" name="upi" value="PhonePe">
+                PhonePe
+            </label>
+
+            <label>
+                <input type="radio" name="upi" value="Google Pay">
+                Google Pay
+            </label>
+
+            <label>
+                <input type="radio" name="upi" value="Paytm">
+                Paytm
+            </label>
+
+            <label>
+                <input type="radio" name="upi" value="BHIM">
+                BHIM
+            </label>
+
+        </div>
+
+        <input
+            type="text"
+            id="upiId"
+            placeholder="Enter UPI ID"
+        >
+
+    </div>
+
+    <!-- WALLET BOX -->
+
+    <div class="wallet-box">
+
+        <h3>Select Wallet</h3>
+
+        <label>
+            <input type="radio" name="wallet">
+            Paytm Wallet
+        </label>
+
+        <label>
+            <input type="radio" name="wallet">
+            Amazon Pay
+        </label>
+
+        <label>
+            <input type="radio" name="wallet">
+            Mobikwik
+        </label>
+
+    </div>
+
+    <!-- CASH BOX -->
+
+    <div class="cash-box">
+
+        <h3>Cash Payment</h3>
+
+        <p>
+            Pay cash directly at parking gate.
+        </p>
+
+    </div>
+
+    <!-- PAYMENT SUMMARY -->
+
     <div class="payment-summary">
 
-        <h3>Payment Summary</h3>
+       <p>Parking Fee : ₹<span id="parkingFee">0</span></p>
 
-        <p>Parking Fee : ₹240</p>
+<p>GST : ₹<span id="gstAmount">0</span></p>
 
-        <p>GST : ₹20</p>
-
-        <h3>Total : ₹260</h3>
+<h3>Total : ₹<span id="finalAmount">0</span></h3>
 
     </div>
 

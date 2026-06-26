@@ -32,124 +32,99 @@
             <div class="section-title">
                 <h2>Category</h2>
             </div>
-            <div class="categories">
-                <button class="active-category">Car</button>
-                <button>Bike</button>
-                <button>EV</button>
-                <button>Bicycle</button>
-                <button>Bus</button>
-                <button>Auto</button>
-            </div>
+          <div class="categories">
+    <button class="active-category" data-type="car">Car</button>
+    <button data-type="bike">Bike</button>
+    <button data-type="ev">EV</button>
+    <button data-type="bicycle">Bicycle</button>
+    <button data-type="bus">Bus</button>
+    <button data-type="auto">Auto</button>
+</div>
         </section>
 
         <!-- Card-1 -->
         <section class="nearby-section">
             <h2>Nearby Space</h2>
             <div class="parking-cards">
-                <div class="parking-card">
-                    <div class="card-img">
-                        <img src="https://thf.bing.com/th/id/OIP.-U0wtlNFtYCi5ZhqcYZQhwHaEJ?w=328&h=185&c=7&r=0&o=7&cb=thfc1falcon2&dpr=1.3&pid=1.7&rm=3"
-                            alt="">
-                        <button class="fav-btn"><img src="icon/favorite_23dp_000000_FILL0_wght400_GRAD0_opsz24.svg"
-                                alt=""></button>
-                    </div>
-                    <div class="card-content">
-                        <div class="card-top">
-                            <h3>Central Parking</h3>
-                            <span class="rating"><img
-                                    src="icon/star_26dp_000000_FILL0_wght400_GRAD0_opsz24.svg">4.5</span>
-                        </div>
-                        <p class="address">
-                            <img src="icon/domain_26dp_000000_FILL0_wght400_GRAD0_opsz24.svg">
-                            Hazaratganj, Lucknow
-                        </p>
-                        <div class="price-row">
-                            <span class="price"><img
-                                    src="icon/currency_rupee_20dp_000000_FILL0_wght400_GRAD0_opsz20.svg"
-                                    alt="">80/hr</span>
-                        </div>
-                    </div>
-                </div>
+                <div class="parking-card"
+     data-type="car"
+     data-name="Central Parking"
+     data-rating="4.5"
+     data-address="Hazratganj, Lucknow"
+     data-price="80/hr"
+     data-image="Images/car.png">
+
+     <div class="card-img">
+    <img src="Images/car.png" alt="">
+</div>
+
+<div class="card-content">
+    <h3>Central Parking</h3>
+    <p class="address">  <img src="icon/domain_26dp_000000_FILL0_wght400_GRAD0_opsz24.svg" alt="">Hazratganj, Lucknow</p>
+    <span>₹80/hr</span>
+</div>
+              
+                </div> 
 
                 <!-- Card-2 -->
-                <div class="parking-card">
-                    <div class="card-img">
-                        <img src="https://thf.bing.com/th/id/OIP.-U0wtlNFtYCi5ZhqcYZQhwHaEJ?w=328&h=185&c=7&r=0&o=7&cb=thfc1falcon2&dpr=1.3&pid=1.7&rm=3"
-                            alt="">
-                        <button class="fav-btn"><img src="icon/favorite_23dp_000000_FILL0_wght400_GRAD0_opsz24.svg"
-                                alt=""></button>
-                    </div>
-                    <div class="card-content">
-                        <div class="card-top">
-                            <h3>Parking</h3>
-                            <span class="rating"><img
-                                    src="icon/star_26dp_000000_FILL0_wght400_GRAD0_opsz24.svg">4.5</span>
-                        </div>
-                        <p class="address">
-                            <img src="icon/domain_26dp_000000_FILL0_wght400_GRAD0_opsz24.svg">
-                            Hazaratganj, Lucknow
-                        </p>
-                        <div class="price-row">
-                            <span class="price"><img
-                                    src="icon/currency_rupee_20dp_000000_FILL0_wght400_GRAD0_opsz20.svg"
-                                    alt="">80.0/hr</span>
-                        </div>
-                    </div>
-                </div>
+               <div class="parking-card"
+     data-type="bike"
+     data-name="Bike Parking"
+     data-rating="4.2"
+     data-address="Aliganj, Lucknow"
+     data-price="40/hr"
+     data-image="Images/bike.png">
+     <div class="card-img">
+    <img src="Images/bike.png" alt="">
+</div>
+
+<div class="card-content">
+    <h3>Bike Parking</h3>
+    <p class="address">  <img src="icon/domain_26dp_000000_FILL0_wght400_GRAD0_opsz24.svg" alt="">Aliganj, Lucknow</p>
+    <span>₹40/hr</span>
+</div>
+               </div>
+
+               <div class="parking-card"
+     data-type="ev"
+     data-name="EV Station"
+     data-rating="4.8"
+     data-address="Gomti Nagar, Lucknow"
+     data-price="120/hr"
+     data-image="Images/ev.png">
+
+     <div class="card-img">
+    <img src="Images/ev.png" alt="">
+</div>
+
+<div class="card-content">
+    <h3>EV Station</h3>
+
+    <p class="address">  <img src="icon/domain_26dp_000000_FILL0_wght400_GRAD0_opsz24.svg" alt="">Gomti Nagar, Lucknow</p>
+    <span>₹120/hr</span>
+</div>
+               </div>
+
+     <div class="parking-card"
+     data-type="bus"
+     data-name="Bus Stand Parking"
+     data-rating="4.1"
+     data-address="Charbagh, Lucknow"
+     data-price="150/hr"
+     data-image="Images/bus.png">
+     <div class="card-img">
+    <img src="Images/bus.png" alt="">
+</div>
+
+<div class="card-content">
+    <h3>Bus Stand  Parking</h3>
+    <p class="address"> <img src="icon/domain_26dp_000000_FILL0_wght400_GRAD0_opsz24.svg" alt="">Charbagh, Lucknow</p>
+    <span>₹150/hr</span>
+</div>
+     </div>
 
                 <!-- Card-3 -->
-                <div class="parking-card">
-                    <div class="card-img">
-                        <img src="https://thf.bing.com/th/id/OIP.-U0wtlNFtYCi5ZhqcYZQhwHaEJ?w=328&h=185&c=7&r=0&o=7&cb=thfc1falcon2&dpr=1.3&pid=1.7&rm=3"
-                            alt="">
-                        <button class="fav-btn"><img src="icon/favorite_23dp_000000_FILL0_wght400_GRAD0_opsz24.svg"
-                                alt=""></button>
-                    </div>
-                    <div class="card-content">
-                        <div class="card-top">
-                            <h3>Central Parking</h3>
-                            <span class="rating"><img
-                                    src="icon/star_26dp_000000_FILL0_wght400_GRAD0_opsz24.svg">4.5</span>
-                        </div>
-                        <p class="address">
-                            <img src="icon/domain_26dp_000000_FILL0_wght400_GRAD0_opsz24.svg">
-                            Hazaratganj, Lucknow
-                        </p>
-                        <div class="price-row">
-                            <span class="price"><img
-                                    src="icon/currency_rupee_20dp_000000_FILL0_wght400_GRAD0_opsz20.svg"
-                                    alt="">80/hr</span>
-                        </div>
-
-                    </div>
-                </div>
-
-                <!-- Card-4 -->
-                <div class="parking-card">
-                    <div class="card-img">
-                        <img src="https://thf.bing.com/th/id/OIP.-U0wtlNFtYCi5ZhqcYZQhwHaEJ?w=328&h=185&c=7&r=0&o=7&cb=thfc1falcon2&dpr=1.3&pid=1.7&rm=3"
-                            alt="">
-                        <button class="fav-btn"><img src="icon/favorite_23dp_000000_FILL0_wght400_GRAD0_opsz24.svg"
-                                alt=""></button>
-                    </div>
-                    <div class="card-content">
-                        <div class="card-top">
-                            <h3>Central Parking</h3>
-                            <span class="rating"><img
-                                    src="icon/star_26dp_000000_FILL0_wght400_GRAD0_opsz24.svg">4.5</span>
-                        </div>
-                        <p class="address">
-                            <img src="icon/domain_26dp_000000_FILL0_wght400_GRAD0_opsz24.svg">
-                            Hazaratganj, Lucknow
-                        </p>
-                        <div class="price-row">
-                            <span class="price"><img
-                                    src="icon/currency_rupee_20dp_000000_FILL0_wght400_GRAD0_opsz20.svg"
-                                    alt="">80/hr</span>
-                        </div>
-
-                    </div>
-                </div>
+                
             </div>
         </section>
 
@@ -183,24 +158,24 @@
 
         <!-- Nav bar -->
         <nav class="bottom-nav">
-            <button class="nav-item active-nav">
+            <button class="nav-item active-nav home-btn">
                 <img src="icon/home_30dp_000000_FILL0_wght400_GRAD0_opsz24.svg" alt="">
             </button>
-            <button class="nav-item">
+            <button class="nav-item map-btn">
                 <img src="icon/map_30dp_000000_FILL0_wght400_GRAD0_opsz24.svg" alt="">
             </button>
             <button class="scan-btn">
                 <img src="icon/qr_code_scanner_30dp_000000_FILL0_wght400_GRAD0_opsz24.svg" alt="">
             </button>
-            <button class="nav-item">
+            <button class="nav-item notification-btn">
                 <img src="icon/notifications_30dp_000000_FILL0_wght400_GRAD0_opsz24.svg" alt="">
             </button>
-            <button class="nav-item">
+            <button class="nav-item profile-btn">
                 <img src="icon/account_circle_30dp_000000_FILL0_wght400_GRAD0_opsz24.svg" alt="">
             </button>
         </nav>
     </div>
-    <script src="../Js/script.js"></script>
+   <script src="Js/script.js"></script>
 </body>
 
 </html>

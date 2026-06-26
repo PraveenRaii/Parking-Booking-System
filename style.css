@@ -254,3 +254,12 @@ header {
     border-radius: 15px;
     cursor: pointer;
 }
+
+.fav-btn.active{
+    background: #ff4d6d;
+    transform: scale(1.1);
+}
+
+.fav-btn{
+    transition: 0.3s;
+}

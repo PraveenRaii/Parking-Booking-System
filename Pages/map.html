@@ -52,9 +52,13 @@
         </div>
 
         <!-- Current Location -->
-        <button class="location-btn">
-            <img src="../icon/map_30dp_000000_FILL0_wght400_GRAD0_opsz24.svg" alt="">
-        </button>
+        
+
+         <div id="map"></div>
+
+    <button class="location-btn">
+        <img src="../icon/map_30dp_000000_FILL0_wght400_GRAD0_opsz24.svg" alt="">
+    </button>
 
     </div>
 
@@ -81,10 +85,19 @@
             Book Now
         </button>
 
+        <div class="marker"
+     data-name="Victoria Parking"
+     data-lat="26.8467"
+     data-lng="80.9462">
+</div>
+
     </div>
 
 </div>
 
 <script src="../Js/map.js"></script>
+<script async 
+src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCHgk1CcahOfXyoQJKKOAQr_cHT0-0bvQw&callback=initMap">
+</script>
 </body>
 </html>

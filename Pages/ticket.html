@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Parking Ticket</title>
+
+<link rel="stylesheet" href="../Css/ticket.css">
+
+</head>
+<body>
+
+<div class="ticket-container">
+
+    <h2>Parking Ticket</h2>
+
+    <div class="ticket-card">
+
+        <h3 id="parkingName">
+            Central Parking
+        </h3>
+
+        <p>
+            <strong>Booking ID:</strong>
+            <span id="bookingId"></span>
+        </p>
+
+        <p>
+            <strong>Vehicle:</strong>
+            <span id="vehicle"></span>
+        </p>
+
+        <p>
+            <strong>Slot:</strong>
+            <span id="slot"></span>
+        </p>
+
+        <p>
+            <strong>Date:</strong>
+            <span id="date"></span>
+        </p>
+
+        <p>
+            <strong>Amount:</strong>
+            ₹<span id="amount"></span>
+        </p>
+
+        <div class="qr-box">
+
+            <img
+            src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=ParkingTicket"
+            alt="QR">
+
+        </div>
+
+    </div>
+
+    <button id="downloadBtn">
+        Download Ticket
+    </button>
+
+</div>
+
+<script src="../Js/ticket.js"></script>
+
+</body>
+</html>
