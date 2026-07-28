@@ -226,3 +226,34 @@ if(scanBtn){
     });
 
 }
+
+// Auto Horizontal Scroll
+const parkingCards = document.querySelector(".parking-cards");
+
+if (parkingCards) {
+
+    setInterval(() => {
+
+       
+        if (
+            parkingCards.scrollLeft + parkingCards.clientWidth >=
+            parkingCards.scrollWidth - 5
+        ) {
+
+            parkingCards.scrollTo({
+                left: 0,
+                behavior: "smooth"
+            });
+
+        } else {
+
+            parkingCards.scrollBy({
+                left: 300,   
+                behavior: "smooth"
+            });
+
+        }
+
+    }, 3000);
+
+}

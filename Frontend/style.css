@@ -81,6 +81,7 @@ header {
     margin-top: 40px;
 }
 
+
 .parking-cards {
     margin-top: 20px;
     display: flex;
@@ -94,7 +95,12 @@ header {
     border-radius: 25px;
     padding: 20px;
     min-width: 300px;
+     flex-shrink: 0;
 
+}
+
+.parking-cards::-webkit-scrollbar{
+    display: none;
 }
 
 .card-img {
