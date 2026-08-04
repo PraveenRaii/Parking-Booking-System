@@ -9,6 +9,8 @@ const uploadRoutes = require("./routes/uploadRoutes");
 const userRoutes = require("./routes/userRoutes");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const aiRoutes = require("./routes/aiRoutes");
+const reviewRoutes = require("./routes/reviewRoutes");
+const favoriteRoutes = require("./routes/favoriteRoutes");
 
 app.use(cors());
 
@@ -24,6 +26,8 @@ app.use("/api/upload", uploadRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/ai", aiRoutes);
+app.use("/api/reviews", reviewRoutes);
+app.use("/api/favorites", favoriteRoutes);
 require("dotenv").config();
 
 

@@ -36,10 +36,15 @@ const parkingSchema = new mongoose.Schema({
         required:true
     },
 
-    rating:{
-        type:Number,
-        default:4.5
-    },
+   rating: {
+    type: Number,
+    default: 4.5
+},
+
+totalReviews: {
+    type: Number,
+    default: 0
+},
     location: {
 
     type: {

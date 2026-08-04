@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import API from "../services/api";
 import Navbar from "../components/Navbar";
 import ParkingMap from "../components/ParkingMap";
-
+import FavoriteButton from "../components/FavoriteButton";
 function Home() {
 
     const navigate = useNavigate();
@@ -535,24 +535,27 @@ function Home() {
                                                     {
 
                                 sortedParkings.map((parking, index) => (
-
                                     <div
 
                                         key={parking._id}
 
-                                        className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden hover:shadow-2xl hover:scale-105 transition duration-300"
+                                       className="bg-white dark:bg-gray-800 rounded-xl shadow-lg overflow-hidden hover:shadow-2xl hover:scale-105 transition duration-300"
 
                                     >
+                                        
+                                       <div className="relative">
 
-                                        <img
+    <img
+        src={parking.image}
+        alt={parking.name}
+        className="w-full h-56 object-cover"
+    />
 
-                                            src={parking.image}
+    <div className="absolute top-3 right-3 bg-white rounded-full p-2 shadow-lg">
+        <FavoriteButton parkingId={parking._id} />
+    </div>
 
-                                            alt={parking.name}
-
-                                            className="w-full h-56 object-cover"
-
-                                        />
+</div>
 
                                         <div className="p-5">
 

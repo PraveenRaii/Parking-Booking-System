@@ -8,6 +8,8 @@ import {
     FaUser,
     FaCar,
     FaMoon,
+    FaHeart,
+    FaQuestionCircle,
     FaSun,
     FaTachometerAlt
 } from "react-icons/fa";
@@ -100,7 +102,7 @@ function Navbar() {
 
                                             :
 
-                                            <FaUserCircle className="text-4xl text-blue-600"/>
+                                            <FaUserCircle className="text-4xl text-blue-600" />
 
                                     }
 
@@ -131,14 +133,16 @@ function Navbar() {
                                                 Profile
 
                                             </Link>
-                                           
 
-    <Link
-        to="/help"
-        className="hover:text-blue-600"
-    >
-        Help Center
-    </Link>
+
+                                            <Link
+                                                to="/help"
+                                                className="flex items-center gap-3 p-4 hover:bg-gray-100   dark:hover:bg-gray-700"
+                                            >
+                                                <FaQuestionCircle />
+                                                <span>Help Center</span>
+                                            </Link>
+
 
 
                                             <Link
@@ -154,10 +158,17 @@ function Navbar() {
                                                 My Bookings
 
                                             </Link>
+                                            <Link
+                                                to="/favorites"
+                                                className="flex items-center gap-3 p-4 hover:bg-gray-100 dark:hover:bg-gray-700"
+                                            >
+                                                <FaHeart />
+                                                <span>Favorites</span>
+                                            </Link>
 
                                             {
 
-                                                user.role==="admin" && (
+                                                user.role === "admin" && (
 
                                                     <Link
 
