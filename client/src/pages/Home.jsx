@@ -4,6 +4,7 @@ import API from "../services/api";
 import Navbar from "../components/Navbar";
 import ParkingMap from "../components/ParkingMap";
 import FavoriteButton from "../components/FavoriteButton";
+import socket from "../socket";
 function Home() {
 
     const navigate = useNavigate();
@@ -20,6 +21,7 @@ function Home() {
     const [rating, setRating] = useState(0);
 
     const [userLocation, setUserLocation] = useState(null);
+    
 
     const categories = [
         "All",
@@ -49,6 +51,28 @@ function Home() {
             (err) => console.log(err)
 
         );
+  socket.on("slotUpdated", (data) => {
+
+        setParkings((prev) =>
+            prev.map((parking) =>
+                parking._id === data.parkingId
+                    ? {
+                          ...parking,
+                          availableSlots: data.availableSlots,
+                      }
+                    : parking
+            )
+        );
+
+    });
+
+    return () => {
+
+        socket.off("slotUpdated");
+
+    };
+
+
 
     }, []);
 
@@ -137,6 +161,7 @@ function Home() {
         );
 
     });
+    
 
     const calculateDistance = (
 
@@ -205,65 +230,56 @@ function Home() {
 
     const sortedParkings = [...filteredParkings];
 
-    if (sortBy === "low") {
+if (sortBy === "low") {
 
-        sortedParkings.sort(
+    sortedParkings.sort(
+        (a, b) => a.price - b.price
+    );
 
-            (a, b) => a.price - b.price
+}
 
+if (sortBy === "high") {
+
+    sortedParkings.sort(
+        (a, b) => b.price - a.price
+    );
+
+}
+
+if (userLocation) {
+
+    sortedParkings.sort((a, b) => {
+
+        if (
+            !a.location ||
+            !b.location ||
+            !Array.isArray(a.location.coordinates) ||
+            !Array.isArray(b.location.coordinates) ||
+            a.location.coordinates.length < 2 ||
+            b.location.coordinates.length < 2
+        ) {
+            return 0;
+        }
+
+        const d1 = calculateDistance(
+            userLocation.lat,
+            userLocation.lng,
+            Number(a.location.coordinates[1]),
+            Number(a.location.coordinates[0])
         );
 
-    }
-
-    if (sortBy === "high") {
-
-        sortedParkings.sort(
-
-            (a, b) => b.price - a.price
-
+        const d2 = calculateDistance(
+            userLocation.lat,
+            userLocation.lng,
+            Number(b.location.coordinates[1]),
+            Number(b.location.coordinates[0])
         );
 
-    }
+        return d1 - d2;
 
-    if (userLocation) {
+    });
 
-        sortedParkings.sort((a, b) => {
-
-            if (
-                !a.location ||
-                !b.location
-            )
-                return 0;
-
-            const d1 = calculateDistance(
-
-                userLocation.lat,
-
-                userLocation.lng,
-
-                a.location.coordinates[1],
-
-                a.location.coordinates[0]
-
-            );
-
-            const d2 = calculateDistance(
-
-                userLocation.lat,
-
-                userLocation.lng,
-
-                b.location.coordinates[1],
-
-                b.location.coordinates[0]
-
-            );
-
-            return d1 - d2;
-
-        });
-
-    }
+}
 
     return (
 
@@ -618,39 +634,25 @@ function Home() {
                                                 {parking.totalSlots}
 
                                             </p>
+{
+    userLocation &&
+    parking.location &&
+    Array.isArray(parking.location.coordinates) &&
+    parking.location.coordinates.length >= 2 && (
 
-                                            {
+        <p className="mt-2 text-green-600 font-semibold">
+          Distance:{" "}
+            {calculateDistance(
+                userLocation.lat,
+                userLocation.lng,
+                Number(parking.location.coordinates[1]),
+                Number(parking.location.coordinates[0])
+            ).toFixed(1)}
+            km
+        </p>
 
-                                                userLocation && parking.location && (
-
-                                                    <p className="mt-2 text-green-600 font-semibold">
-
-                                                        Distance :
-
-                                                        {
-
-                                                            calculateDistance(
-
-                                                                userLocation.lat,
-
-                                                                userLocation.lng,
-
-                                                                parking.location.coordinates[1],
-
-                                                                parking.location.coordinates[0]
-
-                                                            ).toFixed(1)
-
-                                                        }
-
-                                                        km
-
-                                                    </p>
-
-                                                )
-
-                                            }
-
+    )
+}
                                             {
 
                                                 parking.availableSlots === 0 ? (

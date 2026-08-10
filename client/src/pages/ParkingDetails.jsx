@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import API from "../services/api";
 import ReviewForm from "../components/ReviewForm";
 import FavoriteButton from "../components/FavoriteButton";
+import socket from "../socket";
 
 function ParkingDetails() {
 
@@ -57,8 +58,26 @@ useEffect(() => {
 
         fetchParking();
        fetchReviews();
+         socket.on("slotUpdated", (data) => {
 
-    }, []);
+        if (data.parkingId === id) {
+
+            setParking((prev) => ({
+                ...prev,
+                availableSlots: data.availableSlots
+            }));
+
+        }
+
+    });
+
+    return () => {
+
+        socket.off("slotUpdated");
+
+    };
+
+    }, [id]);
 
     if (!parking) {
 
