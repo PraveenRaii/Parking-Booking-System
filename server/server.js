@@ -24,16 +24,31 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+let lastDbError = null;
+
 // Health check endpoint
 app.get("/api/health", (req, res) => {
     const states = ["disconnected", "connected", "connecting", "disconnecting"];
     const dbState = states[mongoose.connection.readyState] || "unknown";
+
+    const envMongo = process.env.MONGO_URL || process.env.MONGO_URI;
+    let safeHost = "not-configured";
+    if (envMongo) {
+        try {
+            const parts = envMongo.split("@");
+            safeHost = parts.length > 1 ? parts[1].split("?")[0].split("/")[0] : "local";
+        } catch {
+            safeHost = "configured";
+        }
+    }
 
     res.json({
         status: "OK",
         server: "running",
         database: dbState,
         dbConnected: mongoose.connection.readyState === 1,
+        mongoHost: safeHost,
+        lastDbError: lastDbError,
         timestamp: new Date().toISOString()
     });
 });
@@ -50,8 +65,9 @@ app.use("/api", (req, res, next) => {
 
     if (mongoose.connection.readyState !== 1) {
         return res.status(503).json({
-            message: "Database connecting or unavailable. Please verify MONGO_URL in Render settings and ensure MongoDB Atlas IP Access allows 0.0.0.0/0.",
-            databaseStatus: "NOT_CONNECTED"
+            message: "Database connection failed. Please check your MONGO_URL in Render settings and make sure MongoDB Atlas Network Access allows 0.0.0.0/0.",
+            databaseStatus: "NOT_CONNECTED",
+            error: lastDbError
         });
     }
     next();
@@ -73,24 +89,38 @@ const mongoUri = envMongo && !envMongo.includes("<db_username>")
     ? envMongo
     : defaultLocalMongo;
 
+let isConnecting = false;
 const connectWithRetry = () => {
+    if (mongoose.connection.readyState === 1 || isConnecting) return;
+    isConnecting = true;
+
     mongoose.connect(mongoUri, { serverSelectionTimeoutMS: 5000 })
         .then(async () => {
+            isConnecting = false;
+            lastDbError = null;
             console.log("MongoDB Connected:", mongoUri.includes("127.0.0.1") ? "Local Database" : "Cloud Atlas");
             await seedDatabase();
         })
         .catch(err => {
+            isConnecting = false;
+            lastDbError = err.message;
             console.log("MongoDB Connection Error:", err.message);
+
             if (!mongoUri.includes("127.0.0.1")) {
                 console.log("Trying local MongoDB fallback...");
                 mongoose.connect(defaultLocalMongo, { serverSelectionTimeoutMS: 2000 })
                     .then(async () => {
+                        lastDbError = null;
                         console.log("Connected to local MongoDB successfully!");
                         await seedDatabase();
                     })
                     .catch(e => {
                         console.log("Local fallback also failed (normal on cloud host like Render):", e.message);
+                        // Retry connecting to Cloud Atlas every 15 seconds
+                        setTimeout(connectWithRetry, 15000);
                     });
+            } else {
+                setTimeout(connectWithRetry, 15000);
             }
         });
 };
