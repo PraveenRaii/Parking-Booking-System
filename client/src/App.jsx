@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -18,51 +18,78 @@ import ManageBookings from "./pages/ManageBookings";
 import AdminRoute from "./components/AdminRoute";
 import HelpCenter from "./pages/HelpCenter";
 import Favorites from "./pages/Favorites";
+
 function App() {
   return (
-    <div className="min-h-screen bg-gray-100 text-black dark:bg-gray-900 dark:text-white transition-colors duration-300">
+    <div className="min-h-screen bg-slate-50 text-slate-800 dark:bg-slate-900 dark:text-slate-100 transition-colors duration-300">
       <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/parking/:id" element={<ParkingDetails />} />
 
+        {/* Auth Routes */}
+        <Route path="/login" element={<Login />} />
+        <Route path="/Login" element={<Navigate to="/login" replace />} />
+        <Route path="/signup" element={<Signup />} />
+
+        {/* User Protected Routes */}
         <Route
-          path="/"
+          path="/booking"
           element={
             <ProtectedRoute>
-              <Home />
+              <Booking />
             </ProtectedRoute>
           }
         />
-
         <Route
-          path="/parking/:id"
+          path="/payment"
           element={
             <ProtectedRoute>
-              <ParkingDetails />
+              <Payment />
             </ProtectedRoute>
           }
         />
-        <Route path="/booking" element={<Booking />} />
-        <Route path="/payment" element={<Payment />} />
-        <Route path="/success" element={<Success />} />
-        <Route path="/Login" element={<Login />} />
-        <Route path="/my-bookings" element={<MyBookings />} />
         <Route
-          path="/help"
-          element={<HelpCenter />}
+          path="/success"
+          element={
+            <ProtectedRoute>
+              <Success />
+            </ProtectedRoute>
+          }
         />
         <Route
+          path="/my-bookings"
+          element={
+            <ProtectedRoute>
+              <MyBookings />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/favorites"
+          element={
+            <ProtectedRoute>
+              <Favorites />
+            </ProtectedRoute>
+          }
+        />
+        <Route path="/help" element={<HelpCenter />} />
 
+        {/* Admin Routes */}
+        <Route
           path="/admin"
-
           element={
-
             <AdminRoute>
-
               <AdminDashboard />
-
             </AdminRoute>
-
           }
-
         />
         <Route
           path="/admin/parking"
@@ -105,15 +132,8 @@ function App() {
           }
         />
 
-
-        <Route path="/signup" element={<Signup />} />
-
-        <Route path="/profile" element={<Profile />} />
-        <Route
-          path="/favorites"
-          element={<Favorites />}
-        />
-
+        {/* Catch-all redirect to Home */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </div>
   );

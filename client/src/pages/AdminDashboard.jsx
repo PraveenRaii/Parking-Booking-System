@@ -1,121 +1,156 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Link } from "react-router-dom";
 import API from "../services/api";
+import AdminSidebar from "../components/AdminSidebar";
+import DashboardCard from "../components/DashboardCard";
+import { FaUsers, FaCar, FaClipboardList, FaRupeeSign, FaCheckCircle, FaCarSide } from "react-icons/fa";
 
 function AdminDashboard() {
+    const [data, setData] = useState({
+        totalUsers: 0,
+        totalParking: 0,
+        totalBookings: 0,
+        revenue: 0,
+        availableSlots: 0,
+        occupiedSlots: 0
+    });
+    const [loading, setLoading] = useState(true);
 
-    const [data, setData] = useState({});
-
-    useEffect(() => {
-
-        fetchDashboard();
-
+    const fetchDashboard = useCallback(async () => {
+        try {
+            const res = await API.get("/dashboard");
+            setData(res.data || {});
+        } catch (err) {
+            console.log("fetchDashboard error:", err.message);
+        } finally {
+            setLoading(false);
+        }
     }, []);
 
-    const fetchDashboard = async () => {
-
-        const res = await API.get("/dashboard");
-
-        setData(res.data);
-
-    };
-
-    const cards = [
-
-        {
-            title: "Users",
-            value: data.totalUsers,
-            color: "bg-blue-600",
-            link: "/admin/users"
-        },
-
-        {
-            title: "Parking",
-            value: data.totalParking,
-            color: "bg-green-600",
-            link: "/admin/parking"
-        },
-
-        {
-            title: "Bookings",
-            value: data.totalBookings,
-            color: "bg-purple-600",
-            link: "/admin/bookings"
-        },
-
-        {
-            title: "Revenue",
-            value: `₹${data.revenue}`,
-            color: "bg-red-600",
-            link: "#"
-        },
-
-        {
-            title: "Available",
-            value: data.availableSlots,
-            color: "bg-cyan-600",
-            link: "#"
-        },
-
-        {
-            title: "Occupied",
-            value: data.occupiedSlots,
-            color: "bg-yellow-600",
-            link: "#"
-        }
-
-    ];
+    useEffect(() => {
+        fetchDashboard();
+    }, [fetchDashboard]);
 
     return (
+        <div className="flex min-h-screen bg-slate-50 dark:bg-slate-900">
+            <AdminSidebar />
 
-        <div className="max-w-7xl mx-auto p-8">
+            <main className="flex-1 p-8 overflow-y-auto">
+                <div className="flex justify-between items-center mb-8">
+                    <div>
+                        <span className="text-orange-500 font-extrabold text-xs uppercase tracking-wider">Overview</span>
+                        <h1 className="text-3xl font-black text-slate-900 dark:text-white mt-1">
+                            Admin Analytics Dashboard
+                        </h1>
+                    </div>
 
-            <h1 className="text-4xl font-bold mb-10">
+                    <Link
+                        to="/admin/add-parking"
+                        className="bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold px-5 py-2.5 rounded-xl shadow-md shadow-orange-500/20 transition text-sm flex items-center gap-2"
+                    >
+                        <span>+ Add New Parking</span>
+                    </Link>
+                </div>
 
-                Admin Dashboard
+                {loading ? (
+                    <div className="text-center py-20 text-orange-600 font-semibold">
+                        Loading dashboard metrics...
+                    </div>
+                ) : (
+                    <>
+                        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <Link to="/admin/users" className="block">
+                                <DashboardCard
+                                    title="Total Users"
+                                    value={data.totalUsers}
+                                    icon={<FaUsers className="text-2xl" />}
+                                    color="bg-orange-500"
+                                />
+                            </Link>
 
-            </h1>
+                            <Link to="/admin/parking" className="block">
+                                <DashboardCard
+                                    title="Active Parking Spaces"
+                                    value={data.totalParking}
+                                    icon={<FaCar className="text-2xl" />}
+                                    color="bg-amber-500"
+                                />
+                            </Link>
 
-            <div className="grid md:grid-cols-3 gap-8">
+                            <Link to="/admin/bookings" className="block">
+                                <DashboardCard
+                                    title="Total Bookings"
+                                    value={data.totalBookings}
+                                    icon={<FaClipboardList className="text-2xl" />}
+                                    color="bg-orange-600"
+                                />
+                            </Link>
 
-                {
+                            <DashboardCard
+                                title="Approved Revenue"
+                                value={`₹${data.revenue || 0}`}
+                                icon={<FaRupeeSign className="text-2xl" />}
+                                color="bg-emerald-600"
+                            />
 
-                    cards.map((card, index) => (
+                            <DashboardCard
+                                title="Available Free Slots"
+                                value={data.availableSlots || 0}
+                                icon={<FaCheckCircle className="text-2xl" />}
+                                color="bg-teal-600"
+                            />
 
-                        <Link
+                            <DashboardCard
+                                title="Occupied Slots"
+                                value={data.occupiedSlots || 0}
+                                icon={<FaCarSide className="text-2xl" />}
+                                color="bg-slate-700"
+                            />
+                        </div>
 
-                            key={index}
-
-                            to={card.link}
-
-                            className={`${card.color} text-white rounded-xl p-8 shadow-lg hover:scale-105 duration-300`}
-
-                        >
-
-                            <h2 className="text-xl">
-
-                                {card.title}
-
+                        {/* Quick Action Navigation Grid */}
+                        <div className="mt-10 bg-white dark:bg-slate-800 rounded-3xl p-8 border border-orange-100 dark:border-slate-700 shadow-sm">
+                            <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4">
+                                Quick Management Portals
                             </h2>
 
-                            <h1 className="text-5xl font-bold mt-4">
+                            <div className="grid md:grid-cols-3 gap-4">
+                                <Link
+                                    to="/admin/parking"
+                                    className="p-5 rounded-2xl bg-orange-50/60 dark:bg-slate-700/50 border border-orange-200/60 dark:border-slate-600 hover:border-orange-500 transition group"
+                                >
+                                    <h3 className="font-bold text-slate-800 dark:text-white group-hover:text-orange-600">
+                                        Manage Parking Spots →
+                                    </h3>
+                                    <p className="text-xs text-slate-500 mt-1">Edit pricing, total slots, addresses, and images.</p>
+                                </Link>
 
-                                {card.value}
+                                <Link
+                                    to="/admin/bookings"
+                                    className="p-5 rounded-2xl bg-orange-50/60 dark:bg-slate-700/50 border border-orange-200/60 dark:border-slate-600 hover:border-orange-500 transition group"
+                                >
+                                    <h3 className="font-bold text-slate-800 dark:text-white group-hover:text-orange-600">
+                                        Manage Reservations →
+                                    </h3>
+                                    <p className="text-xs text-slate-500 mt-1">Approve or reject real-time user bookings.</p>
+                                </Link>
 
-                            </h1>
-
-                        </Link>
-
-                    ))
-
-                }
-
-            </div>
-
+                                <Link
+                                    to="/admin/users"
+                                    className="p-5 rounded-2xl bg-orange-50/60 dark:bg-slate-700/50 border border-orange-200/60 dark:border-slate-600 hover:border-orange-500 transition group"
+                                >
+                                    <h3 className="font-bold text-slate-800 dark:text-white group-hover:text-orange-600">
+                                        User Accounts →
+                                    </h3>
+                                    <p className="text-xs text-slate-500 mt-1">View registered customers and permissions.</p>
+                                </Link>
+                            </div>
+                        </div>
+                    </>
+                )}
+            </main>
         </div>
-
     );
-
 }
 
 export default AdminDashboard;
