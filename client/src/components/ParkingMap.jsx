@@ -1,230 +1,248 @@
-import { useEffect, useState, useCallback, useRef } from "react";
-import {
-    GoogleMap,
-    Marker,
-    InfoWindow,
-    DirectionsRenderer,
-    useJsApiLoader
-} from "@react-google-maps/api";
+import { useEffect, useState, useRef, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import L from "leaflet";
+import "leaflet/dist/leaflet.css";
 import { calculateDistanceKm, estimateDrivingTime, getDirectionsUrl } from "../services/distance";
-import { FaRoute, FaDirections, FaLocationArrow, FaTimes, FaMapMarkedAlt } from "react-icons/fa";
-
-const containerStyle = {
-    width: "100%",
-    height: "560px",
-    borderRadius: "24px"
-};
+import { FaRoute, FaDirections, FaTimes, FaMapMarkerAlt } from "react-icons/fa";
 
 function ParkingMap({ parkings = [], focusedParking = null, userLocation = null }) {
     const navigate = useNavigate();
-    const mapRef = useRef(null);
+    const mapContainerRef = useRef(null);
+    const mapInstanceRef = useRef(null);
+    const markersLayerRef = useRef(null);
+    const routeLayerRef = useRef(null);
 
-    const [selected, setSelected] = useState(null);
-    const [directions, setDirections] = useState(null);
-    const [routeInfo, setRouteInfo] = useState(null);
-    const [routeLoading, setRouteLoading] = useState(false);
+    const [selectedParking, setSelectedParking] = useState(null);
 
-    const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "";
-    const { isLoaded, loadError } = useJsApiLoader({
-        id: "google-map-script",
-        googleMapsApiKey: apiKey
-    });
-
-    const calculateRoute = useCallback((destParking) => {
-        if (!destParking || !destParking.location?.coordinates) return;
-
-        const destLat = Number(destParking.location.coordinates[1]);
-        const destLng = Number(destParking.location.coordinates[0]);
-
-        if (isNaN(destLat) || isNaN(destLng)) return;
-
-        // Default user location if GPS is unavailable
-        const originCoords = userLocation || { lat: 28.6139, lng: 77.2090 };
-
-        // Precompute accurate distance and estimated time
-        const distKm = calculateDistanceKm(originCoords.lat, originCoords.lng, destLat, destLng);
-        const estTime = estimateDrivingTime(distKm);
-
-        setRouteInfo({
-            parkingName: destParking.name,
-            parkingAddress: destParking.address,
-            distance: `${distKm} km`,
-            duration: estTime,
-            destLat,
-            destLng
-        });
-
-        // Check if DirectionsService is available as a valid constructor
-        const canUseDirections =
-            typeof window !== "undefined" &&
-            window.google &&
-            window.google.maps &&
-            typeof window.google.maps.DirectionsService === "function";
-
-        if (canUseDirections) {
-            try {
-                setRouteLoading(true);
-                const directionsService = new window.google.maps.DirectionsService();
-
-                directionsService.route(
-                    {
-                        origin: originCoords,
-                        destination: { lat: destLat, lng: destLng },
-                        travelMode: window.google.maps.TravelMode.DRIVING
-                    },
-                    (result, status) => {
-                        setRouteLoading(false);
-                        if (status === "OK" && result) {
-                            setDirections(result);
-                            const leg = result.routes?.[0]?.legs?.[0];
-                            if (leg) {
-                                setRouteInfo((prev) => ({
-                                    ...prev,
-                                    distance: leg.distance?.text || prev?.distance,
-                                    duration: leg.duration?.text || prev?.duration
-                                }));
-                            }
-                        }
-                    }
-                );
-            } catch (err) {
-                console.log("DirectionsService error:", err.message);
-                setRouteLoading(false);
-            }
-        }
+    const effectiveUserLocation = useMemo(() => {
+        return userLocation || { lat: 28.6139, lng: 77.2090 };
     }, [userLocation]);
 
-    // Whenever focusedParking changes
+    // Filter valid parkings with coordinates
+    const validParkings = useMemo(() => {
+        return (parkings || []).filter(
+            (p) =>
+                p?.location?.coordinates &&
+                Array.isArray(p.location.coordinates) &&
+                p.location.coordinates.length === 2 &&
+                !isNaN(p.location.coordinates[0]) &&
+                !isNaN(p.location.coordinates[1])
+        );
+    }, [parkings]);
+
+    // Compute route info for focused parking or selected parking
+    const activeRouteParking = focusedParking || selectedParking;
+    const routeInfo = useMemo(() => {
+        if (!activeRouteParking?.location?.coordinates) return null;
+        const destLat = Number(activeRouteParking.location.coordinates[1]);
+        const destLng = Number(activeRouteParking.location.coordinates[0]);
+        if (isNaN(destLat) || isNaN(destLng)) return null;
+
+        const distKm = calculateDistanceKm(
+            effectiveUserLocation.lat,
+            effectiveUserLocation.lng,
+            destLat,
+            destLng
+        );
+        const eta = estimateDrivingTime(distKm);
+
+        return {
+            name: activeRouteParking.name,
+            address: activeRouteParking.address,
+            price: activeRouteParking.price,
+            slots: activeRouteParking.availableSlots,
+            id: activeRouteParking._id,
+            distKm,
+            eta,
+            destLat,
+            destLng,
+            navUrl: getDirectionsUrl(destLat, destLng, userLocation)
+        };
+    }, [activeRouteParking, effectiveUserLocation, userLocation]);
+
+    // Initialize Leaflet Map
     useEffect(() => {
-        if (focusedParking) {
-            setSelected(focusedParking);
-            calculateRoute(focusedParking);
-            if (mapRef.current && focusedParking.location?.coordinates) {
-                try {
-                    mapRef.current.panTo({
-                        lat: Number(focusedParking.location.coordinates[1]),
-                        lng: Number(focusedParking.location.coordinates[0])
-                    });
-                    mapRef.current.setZoom(13);
-                } catch {
-                    // Ignore pan errors during map initialization
-                }
-            }
+        if (!mapContainerRef.current) return;
+
+        // If map is already initialized, don't recreate
+        if (mapInstanceRef.current) {
+            mapInstanceRef.current.invalidateSize();
+            return;
         }
-    }, [focusedParking, calculateRoute]);
 
-    const handleMarkerClick = (parking) => {
-        setSelected(parking);
-        calculateRoute(parking);
-    };
+        const map = L.map(mapContainerRef.current, {
+            center: [effectiveUserLocation.lat, effectiveUserLocation.lng],
+            zoom: 12,
+            zoomControl: true,
+            scrollWheelZoom: true
+        });
 
-    const clearRoute = () => {
-        setDirections(null);
-        setRouteInfo(null);
-        setSelected(null);
-    };
+        // Add OpenStreetMap tile layer (Free, no API key needed, never fails)
+        L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+            maxZoom: 19,
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
 
-    const mapCenter = userLocation || {
-        lat: 28.6139,
-        lng: 77.2090
-    };
+        markersLayerRef.current = L.layerGroup().addTo(map);
+        routeLayerRef.current = L.layerGroup().addTo(map);
 
-    const validParkings = parkings.filter(
-        (p) =>
-            p?.location?.coordinates &&
-            Array.isArray(p.location.coordinates) &&
-            p.location.coordinates.length === 2 &&
-            !isNaN(p.location.coordinates[0]) &&
-            !isNaN(p.location.coordinates[1])
-    );
+        mapInstanceRef.current = map;
 
-    // If Google Maps failed to load or key is invalid, show rich route fallback
-    if (loadError) {
-        const target = focusedParking || validParkings[0];
-        const coords = target?.location?.coordinates;
-        const targetLat = coords ? Number(coords[1]) : 28.6139;
-        const targetLng = coords ? Number(coords[0]) : 77.2090;
-        const distKm = calculateDistanceKm(mapCenter.lat, mapCenter.lng, targetLat, targetLng);
-        const estTime = estimateDrivingTime(distKm);
+        return () => {
+            if (mapInstanceRef.current) {
+                mapInstanceRef.current.remove();
+                mapInstanceRef.current = null;
+            }
+        };
+    }, [effectiveUserLocation]);
 
-        return (
-            <div className="rounded-3xl bg-white dark:bg-slate-800 border-2 border-dashed border-orange-200 dark:border-slate-700 p-8 shadow-sm">
-                <div className="flex flex-col md:flex-row items-center justify-between gap-6 pb-6 border-b border-slate-100 dark:border-slate-700">
-                    <div className="flex items-center gap-4">
-                        <div className="p-4 bg-orange-100 dark:bg-orange-950/60 text-orange-600 rounded-2xl text-2xl">
-                            <FaMapMarkedAlt />
-                        </div>
-                        <div>
-                            <h3 className="text-xl font-bold text-slate-900 dark:text-white">
-                                {target ? target.name : "Interactive Parking Map"}
-                            </h3>
-                            <p className="text-slate-500 text-sm mt-0.5">
-                                {target?.address ? `${target.address}, ${target.city}` : "Driving Route & Navigation"}
-                            </p>
-                        </div>
+    // Update markers and route whenever parkings, userLocation, or focusedParking changes
+    useEffect(() => {
+        const map = mapInstanceRef.current;
+        if (!map || !markersLayerRef.current || !routeLayerRef.current) return;
+
+        markersLayerRef.current.clearLayers();
+        routeLayerRef.current.clearLayers();
+
+        // 1. Add User Location Marker
+        if (userLocation && userLocation.lat && userLocation.lng) {
+            const userIcon = L.divIcon({
+                className: "custom-user-marker",
+                html: `
+                    <div style="position: relative; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;">
+                        <span style="position: absolute; width: 32px; height: 32px; background: rgba(59, 130, 246, 0.35); border-radius: 50%; animation: ping 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;"></span>
+                        <div style="width: 22px; height: 22px; background: #2563eb; border: 3px solid #ffffff; border-radius: 50%; box-shadow: 0 4px 10px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; color: white; font-size: 10px;">📍</div>
                     </div>
+                `,
+                iconSize: [32, 32],
+                iconAnchor: [16, 16]
+            });
 
-                    <a
-                        href={getDirectionsUrl(targetLat, targetLng, userLocation)}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold py-3 px-6 rounded-2xl shadow-md shadow-orange-500/20 text-sm transition"
-                    >
-                        <FaDirections />
-                        <span>Open Turn-by-Turn GPS Navigation</span>
-                    </a>
+            L.marker([userLocation.lat, userLocation.lng], { icon: userIcon })
+                .bindPopup("<div style='font-weight: bold; font-size: 12px; color: #1e293b; padding: 2px;'>📍 Your Current Location</div>")
+                .addTo(markersLayerRef.current);
+        }
+
+        // 2. Add Parking Spots Markers
+        const bounds = [];
+        if (userLocation?.lat && userLocation?.lng) {
+            bounds.push([userLocation.lat, userLocation.lng]);
+        }
+
+        validParkings.forEach((parking) => {
+            const lat = Number(parking.location.coordinates[1]);
+            const lng = Number(parking.location.coordinates[0]);
+            bounds.push([lat, lng]);
+
+            const isFocused = (focusedParking && focusedParking._id === parking._id) || (selectedParking && selectedParking._id === parking._id);
+
+            const parkingIcon = L.divIcon({
+                className: "custom-parking-marker",
+                html: `
+                    <div style="
+                        background: ${isFocused ? "linear-gradient(135deg, #ea580c, #b45309)" : "linear-gradient(135deg, #f97316, #fb923c)"};
+                        width: ${isFocused ? "40px" : "34px"};
+                        height: ${isFocused ? "40px" : "34px"};
+                        border-radius: 50%;
+                        border: 3px solid white;
+                        box-shadow: 0 4px 14px rgba(234, 88, 12, 0.5);
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        color: white;
+                        font-weight: 900;
+                        font-size: ${isFocused ? "18px" : "15px"};
+                        cursor: pointer;
+                        transform: ${isFocused ? "scale(1.15)" : "scale(1)"};
+                        transition: transform 0.2s ease;
+                    ">
+                        🚗
+                    </div>
+                `,
+                iconSize: isFocused ? [40, 40] : [34, 34],
+                iconAnchor: isFocused ? [20, 20] : [17, 17]
+            });
+
+            const marker = L.marker([lat, lng], { icon: parkingIcon }).addTo(markersLayerRef.current);
+
+            // Calculate distance for popup
+            const dist = calculateDistanceKm(effectiveUserLocation.lat, effectiveUserLocation.lng, lat, lng);
+            const time = estimateDrivingTime(dist);
+
+            marker.on("click", () => {
+                setSelectedParking(parking);
+            });
+
+            marker.bindPopup(`
+                <div style="font-family: inherit; width: 200px; padding: 4px;">
+                    <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4px;">
+                        <span style="font-weight: 800; font-size: 13px; color: #0f172a;">${parking.name}</span>
+                    </div>
+                    <p style="color: #64748b; font-size: 11px; margin: 0 0 6px;">${parking.address || parking.city}</p>
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 4px 0; border-top: 1px solid #f1f5f9; margin-bottom: 6px;">
+                        <span style="color: #ea580c; font-weight: 800; font-size: 13px;">₹${parking.price} <span style="font-size: 10px; font-weight: normal; color: #64748b;">/hr</span></span>
+                        <span style="font-size: 11px; font-weight: 600; color: #059669;">${parking.availableSlots} free</span>
+                    </div>
+                    ${dist !== null ? `<div style="background: #fff7ed; padding: 4px 6px; border-radius: 8px; font-size: 10px; font-weight: 700; color: #c2410c; margin-bottom: 6px;">📍 ${dist} km (~${time})</div>` : ""}
+                    <div style="display: flex; gap: 4px;">
+                        <a href="/parking/${parking._id}" style="flex: 1; text-align: center; background: #ea580c; color: white; padding: 5px 8px; border-radius: 8px; font-size: 11px; font-weight: bold; text-decoration: none;">Book</a>
+                        <a href="${getDirectionsUrl(lat, lng, userLocation)}" target="_blank" rel="noopener noreferrer" style="flex: 1; text-align: center; background: #0f172a; color: white; padding: 5px 8px; border-radius: 8px; font-size: 11px; font-weight: bold; text-decoration: none;">Route</a>
+                    </div>
                 </div>
+            `);
+        });
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
-                    <div className="p-4 bg-orange-50/70 dark:bg-slate-900/60 rounded-2xl border border-orange-100 dark:border-slate-700">
-                        <span className="text-xs font-bold text-orange-600 uppercase">Driving Distance</span>
-                        <p className="text-2xl font-black text-slate-900 dark:text-white mt-1">
-                            {distKm !== null ? `${distKm} km` : "Calculated from your location"}
-                        </p>
-                    </div>
+        // 3. Draw Route Polyline if focused or selected
+        if (activeRouteParking?.location?.coordinates) {
+            const destLat = Number(activeRouteParking.location.coordinates[1]);
+            const destLng = Number(activeRouteParking.location.coordinates[0]);
 
-                    <div className="p-4 bg-amber-50/70 dark:bg-slate-900/60 rounded-2xl border border-amber-100 dark:border-slate-700">
-                        <span className="text-xs font-bold text-amber-600 uppercase">Estimated Travel Time</span>
-                        <p className="text-2xl font-black text-slate-900 dark:text-white mt-1">
-                            {estTime !== null ? `~${estTime}` : "City driving speed"}
-                        </p>
-                    </div>
-                </div>
-            </div>
-        );
-    }
+            if (!isNaN(destLat) && !isNaN(destLng)) {
+                // Route polyline with dashed style
+                const latlngs = [
+                    [effectiveUserLocation.lat, effectiveUserLocation.lng],
+                    [destLat, destLng]
+                ];
 
-    if (!isLoaded) {
-        return (
-            <div className="w-full h-96 rounded-3xl bg-orange-50 dark:bg-slate-800 flex flex-col items-center justify-center text-orange-600 font-semibold border border-orange-200 dark:border-slate-700 p-8 text-center">
-                <div className="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin mb-3" />
-                <p>Loading Interactive Map & Route Services...</p>
-            </div>
-        );
-    }
+                const routeLine = L.polyline(latlngs, {
+                    color: "#ea580c",
+                    weight: 5,
+                    opacity: 0.9,
+                    dashArray: "8, 8"
+                }).addTo(routeLayerRef.current);
+
+                map.fitBounds(routeLine.getBounds(), { padding: [60, 60], maxZoom: 14 });
+            }
+        } else if (bounds.length > 0) {
+            map.fitBounds(bounds, { padding: [50, 50], maxZoom: 13 });
+        }
+    }, [validParkings, userLocation, focusedParking, selectedParking, effectiveUserLocation, activeRouteParking]);
 
     return (
         <div className="relative rounded-3xl overflow-hidden shadow-xl border border-orange-200 dark:border-slate-700">
-            {/* Live Floating Route Overlay */}
+            {/* Live Floating Route Card */}
             {routeInfo && (
-                <div className="absolute top-4 left-4 right-4 md:right-auto md:w-96 z-10 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-4 rounded-2xl shadow-xl border-2 border-orange-500 text-slate-800 dark:text-white animate-in fade-in slide-in-from-top-3 duration-200">
+                <div className="absolute top-4 left-4 right-4 md:right-auto md:w-96 z-[1000] bg-white/95 dark:bg-slate-900/95 backdrop-blur-md p-4 rounded-2xl shadow-xl border-2 border-orange-500 text-slate-800 dark:text-white animate-in fade-in slide-in-from-top-3 duration-200">
                     <div className="flex justify-between items-start gap-2">
                         <div className="flex items-center gap-2">
-                            <span className="p-2 bg-gradient-to-tr from-orange-500 to-amber-500 text-white rounded-xl shadow-md">
+                            <span className="p-2 bg-gradient-to-tr from-orange-500 to-amber-500 text-white rounded-xl shadow-md text-sm">
                                 <FaRoute />
                             </span>
                             <div>
                                 <span className="text-xs font-bold text-orange-500 uppercase tracking-wider">Driving Route</span>
                                 <h4 className="font-bold text-sm leading-tight text-slate-900 dark:text-white truncate max-w-[210px]">
-                                    {routeInfo.parkingName}
+                                    {routeInfo.name}
                                 </h4>
                             </div>
                         </div>
 
                         <button
-                            onClick={clearRoute}
-                            className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800"
+                            type="button"
+                            onClick={() => {
+                                setSelectedParking(null);
+                                if (routeLayerRef.current) routeLayerRef.current.clearLayers();
+                            }}
+                            className="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-white rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition cursor-pointer"
                             title="Close Route"
                         >
                             <FaTimes size={14} />
@@ -232,24 +250,24 @@ function ParkingMap({ parkings = [], focusedParking = null, userLocation = null 
                     </div>
 
                     <div className="mt-3 pt-3 border-t border-slate-100 dark:border-slate-800 grid grid-cols-2 gap-3 text-center">
-                        <div className="bg-orange-50 dark:bg-orange-950/40 p-2 rounded-xl border border-orange-100 dark:border-orange-900/50">
+                        <div className="bg-orange-50 dark:bg-orange-950/40 p-2.5 rounded-xl border border-orange-100 dark:border-orange-900/50">
                             <span className="text-[10px] text-slate-400 uppercase font-bold block">Distance</span>
                             <span className="font-black text-lg text-orange-600 dark:text-orange-400">
-                                {routeInfo.distance}
+                                {routeInfo.distKm !== null ? `${routeInfo.distKm} km` : "Nearby"}
                             </span>
                         </div>
 
-                        <div className="bg-amber-50 dark:bg-amber-950/40 p-2 rounded-xl border border-amber-100 dark:border-amber-900/50">
-                            <span className="text-[10px] text-slate-400 uppercase font-bold block">Driving Time</span>
+                        <div className="bg-amber-50 dark:bg-amber-950/40 p-2.5 rounded-xl border border-amber-100 dark:border-amber-900/50">
+                            <span className="text-[10px] text-slate-400 uppercase font-bold block">Est. Drive Time</span>
                             <span className="font-black text-lg text-amber-600 dark:text-amber-400">
-                                {routeLoading ? "Calculating..." : routeInfo.duration}
+                                {routeInfo.eta || "~10 mins"}
                             </span>
                         </div>
                     </div>
 
                     <div className="mt-3 flex gap-2">
                         <a
-                            href={getDirectionsUrl(routeInfo.destLat, routeInfo.destLng, userLocation)}
+                            href={routeInfo.navUrl}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="flex-1 bg-gradient-to-r from-orange-500 to-amber-500 hover:from-orange-600 hover:to-amber-600 text-white font-bold py-2 px-3 rounded-xl shadow-md shadow-orange-500/20 text-xs text-center flex items-center justify-center gap-1.5 transition"
@@ -258,10 +276,11 @@ function ParkingMap({ parkings = [], focusedParking = null, userLocation = null 
                             <span>Start Navigation</span>
                         </a>
 
-                        {selected?._id && (
+                        {routeInfo.id && (
                             <button
-                                onClick={() => navigate(`/parking/${selected._id}`)}
-                                className="bg-slate-800 hover:bg-slate-900 text-white font-semibold py-2 px-3 rounded-xl text-xs transition"
+                                type="button"
+                                onClick={() => navigate(`/parking/${routeInfo.id}`)}
+                                className="bg-slate-800 hover:bg-slate-900 text-white font-semibold py-2 px-3 rounded-xl text-xs transition cursor-pointer"
                             >
                                 Book Spot
                             </button>
@@ -270,121 +289,20 @@ function ParkingMap({ parkings = [], focusedParking = null, userLocation = null 
                 </div>
             )}
 
-            <GoogleMap
-                onLoad={(map) => { mapRef.current = map; }}
-                mapContainerStyle={containerStyle}
-                center={mapCenter}
-                zoom={12}
-                options={{
-                    mapTypeControl: false,
-                    streetViewControl: false,
-                    fullscreenControl: true
-                }}
-            >
-                {/* User Current Location Marker */}
-                {userLocation && (
-                    <Marker
-                        position={userLocation}
-                        title="Your Location"
-                        icon={{
-                            url: "https://maps.google.com/mapfiles/ms/icons/blue-dot.png"
-                        }}
-                    />
-                )}
+            {/* Empty State Banner if 0 Parkings */}
+            {validParkings.length === 0 && (
+                <div className="absolute bottom-4 left-4 right-4 z-[999] bg-white/90 dark:bg-slate-900/90 backdrop-blur-md px-4 py-2.5 rounded-2xl shadow-lg border border-orange-200 dark:border-slate-700 text-xs text-slate-600 dark:text-slate-300 flex items-center justify-center gap-2">
+                    <FaMapMarkerAlt className="text-orange-500" />
+                    <span>Map centered on Delhi NCR. Connect database to display live parking spots.</span>
+                </div>
+            )}
 
-                {/* Parking Spots Markers */}
-                {validParkings.map((parking) => (
-                    <Marker
-                        key={parking._id}
-                        position={{
-                            lat: Number(parking.location.coordinates[1]),
-                            lng: Number(parking.location.coordinates[0])
-                        }}
-                        onClick={() => handleMarkerClick(parking)}
-                        icon={{
-                            url: selected?._id === parking._id
-                                ? "https://maps.google.com/mapfiles/ms/icons/orange-dot.png"
-                                : "https://maps.google.com/mapfiles/ms/icons/red-dot.png"
-                        }}
-                    />
-                ))}
-
-                {/* Driving Route Polyline */}
-                {directions && (
-                    <DirectionsRenderer
-                        directions={directions}
-                        options={{
-                            polylineOptions: {
-                                strokeColor: "#ea580c",
-                                strokeWeight: 6,
-                                strokeOpacity: 0.9
-                            },
-                            suppressMarkers: false
-                        }}
-                    />
-                )}
-
-                {/* Info Window on Click */}
-                {selected && selected.location?.coordinates && (
-                    <InfoWindow
-                        position={{
-                            lat: Number(selected.location.coordinates[1]),
-                            lng: Number(selected.location.coordinates[0])
-                        }}
-                        onCloseClick={() => setSelected(null)}
-                    >
-                        <div className="w-64 p-1 text-slate-800">
-                            {selected.image && (
-                                <img
-                                    src={selected.image}
-                                    alt={selected.name}
-                                    className="rounded-xl w-full h-28 object-cover mb-2"
-                                />
-                            )}
-                            <h3 className="font-bold text-base text-slate-900 leading-tight">
-                                {selected.name}
-                            </h3>
-                            <p className="text-xs text-slate-500 mt-0.5">{selected.address}</p>
-
-                            <div className="flex justify-between items-center mt-2 pt-2 border-t border-slate-100">
-                                <span className="text-orange-600 font-extrabold text-sm">
-                                    ₹{selected.price} / hr
-                                </span>
-                                <span className="text-xs font-semibold text-emerald-600">
-                                    {selected.availableSlots} slots left
-                                </span>
-                            </div>
-
-                            {userLocation && (
-                                <div className="mt-2 p-2 bg-orange-50 rounded-lg text-xs flex items-center justify-between font-semibold text-orange-800">
-                                    <span className="flex items-center gap-1">
-                                        <FaLocationArrow className="text-orange-600" />
-                                        <span>{calculateDistanceKm(userLocation.lat, userLocation.lng, selected.location.coordinates[1], selected.location.coordinates[0])} km away</span>
-                                    </span>
-                                    <span className="text-slate-500 text-[10px]">
-                                        ~{estimateDrivingTime(calculateDistanceKm(userLocation.lat, userLocation.lng, selected.location.coordinates[1], selected.location.coordinates[0]))}
-                                    </span>
-                                </div>
-                            )}
-
-                            <div className="grid grid-cols-2 gap-2 mt-3">
-                                <button
-                                    onClick={() => navigate(`/parking/${selected._id}`)}
-                                    className="bg-orange-500 hover:bg-orange-600 text-white text-xs font-bold py-2 px-2 rounded-xl transition"
-                                >
-                                    Book Now
-                                </button>
-                                <button
-                                    onClick={() => calculateRoute(selected)}
-                                    className="bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold py-2 px-2 rounded-xl transition flex items-center justify-center gap-1"
-                                >
-                                    <FaRoute /> Route
-                                </button>
-                            </div>
-                        </div>
-                    </InfoWindow>
-                )}
-            </GoogleMap>
+            {/* Leaflet Map Div */}
+            <div
+                ref={mapContainerRef}
+                style={{ width: "100%", height: "560px", zIndex: 1 }}
+                className="bg-slate-100 dark:bg-slate-800"
+            />
         </div>
     );
 }
